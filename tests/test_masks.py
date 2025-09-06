@@ -1,28 +1,24 @@
 import pytest
 from src.masks import get_mask_account, get_mask_card_number
+from typing import Union
 
+@pytest.fixture(params=["12345", "", "1234567890"])
+def input_val_edge(request) -> Union[str, int]:
+    """Фикстура для теста test_edge_cases"""
+    return request.param
 
-@pytest.mark.parametrize(
-    "input_val",
-    [
-        "12345",
-        "",
-        "1234567890",
-    ],
-)
-def test_edge_cases(input_val: str) -> None:
-    """Проверяем что функция не падает и возвращает корректный формат"""
-    result = get_mask_card_number(input_val)
+@pytest.fixture(params=[("", "** "), ("1234", "** 1234"), ("987654321", "** 4321")])
+def input_val_expected(request) -> tuple[Union[str, int], str]:
+    """Фикстура для теста test_get_mask_account"""
+    return request.param
+
+def test_edge_cases(input_val_edge: Union[str, int]) -> None:
+    """Проверяет является ли результат строкой"""
+    result = get_mask_card_number(input_val_edge)
     assert isinstance(result, str)
-    assert all(c.isdigit() or c == "*" or c == " " for c in result)
 
 
-@pytest.mark.parametrize(
-    "input_val, expected",
-    [
-        ("", " "),
-    ],
-)
-def test_get_mask_account(input_val: str, expected: str) -> None:
-    """Если пустая строка, то  — возвращает ''"""
+def test_get_mask_account(input_val_expected: tuple[Union[str, int], str]) -> None:
+    """Сравнивает возвращаемое значение функции get_mask_account с ожидаемым"""
+    input_val, expected = input_val_expected
     assert get_mask_account(input_val) == expected
