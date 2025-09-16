@@ -12,6 +12,7 @@ def input_val_expected(request) -> tuple[Union[str, int], str]:
     """Фикстура для теста test_get_mask_account"""
     return request.param
 
+
 def test_edge_cases(input_val_edge: Union[str, int]) -> None:
     """Проверяет является ли результат строкой"""
     result = get_mask_card_number(input_val_edge)
