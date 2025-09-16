@@ -13,7 +13,6 @@ def transaction_descriptions(transactions):
     Генератор, который по очереди возвращает строковое описание каждой транзакции.
     """
     for t in transactions:
-        # Можно адаптировать описание в зависимости от структуры словаря
         desc = f"Transaction of {t.get('amount', 'unknown')} {t.get('currency', '')} " \
                f"from {t.get('from', 'unknown')} to {t.get('to', 'unknown')}"
         yield desc
