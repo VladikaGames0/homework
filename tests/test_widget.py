@@ -7,21 +7,17 @@ from typing import Union
 def account_with_short_schet() -> str:
     return "Счет 123"
 
-
 @pytest.fixture
 def visa_card() -> str:
     return "Visa 1234567812345678"
-
 
 @pytest.fixture
 def numeric_account() -> int:
     return 1234567890
 
-
 @pytest.fixture
 def date_without_time() -> str:
     return "2024-06-24"
-
 
 @pytest.mark.parametrize(
     "input_val, expected",
@@ -29,6 +25,8 @@ def date_without_time() -> str:
         ("Счет 123", "Счет **123"),
     ],
 )
+
+
 def test_mask_account_card(input_val: str, expected: str) -> None:
     """Проверяем, если счёт меньше 4 символов"""
     assert mask_account_card(input_val) == expected
