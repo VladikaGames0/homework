@@ -7,12 +7,22 @@ load_dotenv()
 API_KEY = os.getenv("EXCHANGE_API_KEY")
 API_URL = "https://api.apilayer.com/exchangerates_data/latest"
 
-def convert_to_rub(amount: float, currency: str) -> float:
-    currency = currency.upper()
+def convert_to_rub(transaction: dict) -> float:
+    """
+    Функция принимает транзакцию (словарь с ключами 'amount' и 'currency')
+    и возвращает сумму в рублях (float).
+    """
+    amount = transaction.get("amount")
+    currency = transaction.get("currency", "").upper()
+
+    if not isinstance(amount, (int, float)) or not currency:
+        return 0.0
+
     if currency == "RUB":
-        return amount
+        return float(amount)
+
     if currency not in ("USD", "EUR"):
-        return amount
+        return float(amount)
 
     headers = {"apikey": API_KEY}
     params = {"base": currency, "symbols": "RUB"}
@@ -23,8 +33,8 @@ def convert_to_rub(amount: float, currency: str) -> float:
         data = response.json()
         rate = data["rates"].get("RUB")
         if rate:
-            return amount * rate
+            return float(amount) * float(rate)
     except Exception:
         pass
 
-    return amount
+    return float(amount)
