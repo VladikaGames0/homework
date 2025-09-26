@@ -7,7 +7,7 @@ def mask_account_card(card_number: Union[str, int]) -> str:
     s = str(card_number)
     if s.startswith("Счет"):
         card_name = "Счет"
-        number = s[len(card_name):].strip()
+        number = s[len(card_name) :].strip()
         return f"{card_name} **{number[-4:]}"
     # Можно расширить логику для других случаев, если нужно
     return s
