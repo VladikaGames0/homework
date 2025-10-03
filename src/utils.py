@@ -1,23 +1,16 @@
 import json
-import logging
-from typing import List, Dict
+import os
 
-logger = logging.getLogger("utils")
-
-def load_transactions(file_path: str) -> List[Dict]:
-    """Загружает данные из JSON-файла с финансовыми транзакциями."""
+def load_transactions(filepath):
+    """Загружает данные о транзакциях из JSON-файла."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        if isinstance(data, list):
-            logger.info(f"Успешно загружены транзакции из файла: {file_path}")
-            return data
-        else:
-            logger.warning(f"Данные в файле {file_path} имеют неверный формат (не список).")
-            return []
+            if isinstance(data, list):
+                return data
+            else:
+                return []
     except FileNotFoundError:
-        logger.error(f"Файл не найден: {file_path}")
         return []
     except json.JSONDecodeError:
-        logger.error(f"Ошибка декодирования JSON из файла: {file_path}")
         return []

@@ -1,47 +1,35 @@
-
 import unittest
-import os
-import json
+from unittest.mock import mock_open, patch
 from src.utils import load_transactions
+import json
 
-class TestLoadTransactions(unittest.TestCase):
-    TEST_FILE = "test_transactions.json"
-    INVALID_FILE = "invalid.json"
-    NOT_FOUND_FILE = "not_exist.json"
+class TestUtils(unittest.TestCase):
 
-    def setUp(self):
-        # Создаём корректный JSON-файл с транзакциями (список словарей)
-        data = [
-            {"amount": 100, "currency": "USD"},
-            {"amount": 200, "currency": "EUR"}
-        ]
-        with open(self.TEST_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f)
+    def test_load_transactions_success(self):
+        # Мокируем содержимое файла
+        mock_data = '[{"id": 1, "amount": 100}, {"id": 2, "amount": 200}]'
+        with patch("builtins.open", mock_open(read_data=mock_data)) as mock_file:
+            result = load_transactions("fake_path.json")
+            self.assertEqual(result, [{"id": 1, "amount": 100}, {"id": 2, "amount": 200}])
 
-        # Создаём файл с неверным форматом (например, словарь вместо списка)
-        with open(self.INVALID_FILE, "w", encoding="utf-8") as f:
-            json.dump({"amount": 100}, f)
+    def test_load_transactions_empty_file(self):
+        with patch("builtins.open", mock_open(read_data='')) as mock_file:
+            result = load_transactions("fake_path.json")
+            self.assertEqual(result, [])
 
-    def tearDown(self):
-        # Удаляем созданные тестовые файлы
-        if os.path.exists(self.TEST_FILE):
-            os.remove(self.TEST_FILE)
-        if os.path.exists(self.INVALID_FILE):
-            os.remove(self.INVALID_FILE)
+    def test_load_transactions_invalid_json(self):
+        with patch("builtins.open", mock_open(read_data='invalid json')) as mock_file:
+            result = load_transactions("fake_path.json")
+            self.assertEqual(result, [])
 
-    def test_load_valid_file(self):
-        result = load_transactions(self.TEST_FILE)
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0]["currency"], "USD")
+    def test_load_transactions_not_a_list(self):
+        mock_data = '{"key": "value"}'
+        with patch("builtins.open", mock_open(read_data=mock_data)) as mock_file:
+            result = load_transactions("fake_path.json")
+            self.assertEqual(result, [])
 
-    def test_load_invalid_format(self):
-        result = load_transactions(self.INVALID_FILE)
-        self.assertEqual(result, [])
-
-    def test_file_not_found(self):
-        result = load_transactions(self.NOT_FOUND_FILE)
-        self.assertEqual(result, [])
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_load_transactions_file_not_found(self):
+        with patch("builtins.open") as mocked_open:
+            mocked_open.side_effect = FileNotFoundError
+            result = load_transactions("non_existent_file.json")
+            self.assertEqual(result, [])
