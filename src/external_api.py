@@ -17,15 +17,15 @@ def convert_to_rub(transaction):
         if exchange_rate:
             return float(amount) * exchange_rate
         else:
-            return None  # Или обработать ошибку, например, вернуть исходную сумму
+            return None
 
 def get_exchange_rate(currency):
     """Получает текущий курс валюты к рублю через API."""
     url = f'https://api.apilayer.com/exchangerates_data/latest?symbols=RUB&base={currency}'
-    headers = {"apikey": API_KEY}  # Используем API key из .env
+    headers = {"apikey": API_KEY}
     try:
         response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Проверка на ошибки HTTP
+        response.raise_for_status()
         data = response.json()
         return data['rates']['RUB']
     except requests.exceptions.RequestException as e:
