@@ -124,7 +124,6 @@ def main():
         from_ = item.get('from', '')
         to = item.get('to', '')
         operation_sum = item.get('operationAmount') or item.get('amount') or item.get('sum')
-        # Вывод суммы и валюты
         amount_str = ''
         if isinstance(operation_sum, dict):
             amount_str = f"{operation_sum.get('amount', '')} {operation_sum.get('currency', '')}".strip()

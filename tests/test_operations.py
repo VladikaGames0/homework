@@ -15,7 +15,7 @@ def sample_data():
 def test_process_bank_operations_count(sample_data):
     categories = ['Оплата', 'Перевод', 'Покупка']
     result = process_bank_operations(sample_data, categories)
-    assert result['Оплата'] == 3  # три операции с "Оплата" в описании
+    assert result['Оплата'] == 3
     assert result['Перевод'] == 1
     assert result['Покупка'] == 0
 
