@@ -2,7 +2,9 @@ import json
 import csv
 import openpyxl
 from typing import List, Dict
+
 from search import process_bank_search
+from operations import process_bank_operations
 
 def load_json(filename: str) -> List[Dict]:
     with open(filename, encoding='utf-8') as f:
@@ -23,8 +25,9 @@ def load_xlsx(filename: str) -> List[Dict]:
         data.append(item)
     return data
 
-def filter_by_status(data: List[Dict], status: str) -> List[Dict]:
-    return [item for item in data if item.get('status') == status]
+def filter_by_status(data, status):
+    status = status.upper()
+    return [item for item in data if item.get('status', '').upper() == status]
 
 def sort_by_date(data: List[Dict], ascending: bool = True) -> List[Dict]:
     from datetime import datetime
@@ -32,21 +35,26 @@ def sort_by_date(data: List[Dict], ascending: bool = True) -> List[Dict]:
         try:
             return datetime.strptime(d, "%d.%m.%Y")
         except Exception:
-            return datetime.min
+            return datetime.min  # если дата невалидная, ставим минимум, чтобы сортировка не падала
     return sorted(data, key=lambda x: parse_date(x.get('date', '')), reverse=not ascending)
 
-def filter_by_currency(data: List[Dict], currency: str) -> List[Dict]:
+def filter_by_currency(data, currency):
     filtered = []
+    for operation in data:
+        cur = operation.get('operationAmount', {}).get('currency', {}).get('code')
+        if cur and cur.upper() == currency.upper():
+            filtered.append(operation)
+    return filtered
     for item in data:
+        # Выделим валюту из строки "Сумма: 130 USD" или подобной
         operation_sum = item.get('operationAmount') or item.get('amount') or item.get('sum')
         if not operation_sum:
+            # иногда сумма может быть в поле 'description' например, но для простоты ищем в 'amount' или 'operationAmount'
             filtered.append(item)
             continue
-        if isinstance(operation_sum, dict):
-            cur = operation_sum.get('currency')
-            if cur and cur.upper() == currency.upper():
-                filtered.append(item)
+
         else:
+            # Если строка с валютой (например "130 USD")
             if isinstance(operation_sum, str) and currency.upper() in operation_sum.upper():
                 filtered.append(item)
     return filtered
@@ -93,6 +101,7 @@ def main():
 
     filtered_data = [item for item in data if item.get('status') == status_upper]
 
+    # Сортировка по дате
     sort_answer = user_input('Программа: Отсортировать операции по дате? Да/Нет\nПользователь: ', ['Да', 'Нет'])
     if sort_answer.lower() == 'да':
         order_answer = user_input('Программа: Отсортировать по возрастанию или по убыванию?\nПользователь: ',
@@ -103,6 +112,7 @@ def main():
     if rub_answer.lower() == 'да':
         filtered_data = filter_by_currency(filtered_data, 'RUB')
 
+    # Фильтрация по описанию
     desc_answer = user_input(
         'Программа: Отфильтровать список транзакций по определенному слову в описании? Да/Нет\nПользователь: ',
         ['Да', 'Нет'])
@@ -118,12 +128,14 @@ def main():
 
     print(f'Программа: Всего банковских операций в выборке: {len(filtered_data)}\n')
 
+    # Форматированный вывод
     for item in filtered_data:
         date = item.get('date', 'Неизвестна')
         description = item.get('description', 'Без описания')
         from_ = item.get('from', '')
         to = item.get('to', '')
         operation_sum = item.get('operationAmount') or item.get('amount') or item.get('sum')
+        # Вывод суммы и валюты
         amount_str = ''
         if isinstance(operation_sum, dict):
             amount_str = f"{operation_sum.get('amount', '')} {operation_sum.get('currency', '')}".strip()
@@ -145,4 +157,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
