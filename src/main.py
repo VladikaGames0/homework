@@ -49,7 +49,7 @@ def filter_by_currency(data: List[Dict], currency: str) -> List[Dict]:
         else:
             if isinstance(operation_sum, str) and currency.upper() in operation_sum.upper():
                 filtered.append(item)
-        return filtered
+    return filtered
 def user_input(prompt: str, values: List[str] = None) -> str:
     while True:
         answer = input(prompt).strip()
